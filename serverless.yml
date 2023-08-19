@@ -1,0 +1,49 @@
+service: serverless-s3
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ap-south-1
+  iam:
+    role: arn:aws:iam::501921308880:role/lambdaRoleToS3
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - s3:
+          bucket: pdfv1
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: billGeneration/
+            - suffix: .pdf
+          existing: true
+      
+resources:
+  Resources:
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-products
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    ordersQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.stage}-orders-queue
+
+    orderNotification:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:provider.stage}-order notification
