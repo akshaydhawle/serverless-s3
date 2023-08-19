@@ -16,7 +16,7 @@ module.exports.hello = async (event) => {
   };
   const command = new GetObjectCommand(input);
   const downloadedFile = (await client.send(command)).Body;
-  
+
   console.log('Downloaded file:', downloadedFile);
 
   return {
@@ -28,6 +28,16 @@ module.exports.hello = async (event) => {
       },
       null,
       2
+    ),
+  };
+};
+
+module.exports.getProducts = async (event) => {
+  const products = ["product1","product2"];
+  return {
+    statusCode: 200,
+    body: JSON.stringify(
+        products
     ),
   };
 };

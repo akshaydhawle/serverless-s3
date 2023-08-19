@@ -10,6 +10,13 @@ provider:
   iam:
     role: arn:aws:iam::501921308880:role/lambdaRoleToS3
 
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+
 functions:
   hello:
     handler: handler.hello
@@ -21,7 +28,13 @@ functions:
             - prefix: billGeneration/
             - suffix: .pdf
           existing: true
-      
+  getProducts:
+    handler: handler.getProducts
+    events:
+      - http:
+          path: /products
+          method: get
+
 resources:
   Resources:
     ProductsTable:
